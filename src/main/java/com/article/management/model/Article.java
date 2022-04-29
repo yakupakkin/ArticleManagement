@@ -17,7 +17,7 @@ import java.util.Date;
 public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Integer id;
+    private Long id;
 
     @Length(max = 100, message = "The field must be less than 100 characters")
     @NotNull
@@ -27,5 +27,5 @@ public class Article {
     @NotNull
     private String content;
     @NotNull
-    private LocalDateTime publishingDate;
+    private String publishingDate;
 }

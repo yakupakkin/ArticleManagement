@@ -1,6 +1,7 @@
 package com.article.management.dao;
 
 import com.article.management.model.Article;
+import com.article.management.util.DateUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,16 +20,15 @@ public class DaoTests {
     @Autowired
     IArticleRepository articleRepository;
     @Test
-    void testCreateReadDelete() {
+    void testCreateReadArticle() {
         //given
-        Article article = new Article(1, "Java", "Yakup Akkin","content", LocalDateTime.now());
+        String publishingDate= DateUtil.convertLocalDateTimeToISO8601(LocalDateTime.now());
+        Article article = new Article(1L, "Java", "Yakup Akkin","content", publishingDate);
         //when
         articleRepository.save(article);
         Iterable<Article> articles = articleRepository.findAll();
         //then
         Assertions.assertThat(articles).extracting(Article::getTitle).asList();
 
-        articleRepository.deleteAll();
-        Assertions.assertThat(articleRepository.findAll()).isEmpty();
     }
 }

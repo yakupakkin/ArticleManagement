@@ -1,57 +1,46 @@
 package com.article.management.configuration;
 
-import com.article.management.service.LoginUserDetailsService;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 
 @Configuration
     @EnableWebSecurity
     public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-        @Bean
-        public UserDetailsService userDetailsService() {
-            return new LoginUserDetailsService();
-        }
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        @Bean
-        public BCryptPasswordEncoder passwordEncoder() {
-            return new BCryptPasswordEncoder();
-        }
+        auth.inMemoryAuthentication()
+                .withUser("user").password("{noop}user").roles("USER")
+                .and()
+                .withUser("admin").password("{noop}admin").roles("USER", "ADMIN");
 
-        @Bean
-        public DaoAuthenticationProvider authenticationProvider() {
-            DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-            authProvider.setUserDetailsService(userDetailsService());
-            authProvider.setPasswordEncoder(passwordEncoder());
+    }
 
-            return authProvider;
-        }
+    // Secure the endpoins with HTTP Basic authentication
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
 
-        @Override
-        protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-            auth.authenticationProvider(authenticationProvider());
-        }
-
-        @Override
-        protected void configure(HttpSecurity http) throws Exception {
-            http.authorizeRequests()
-                    .antMatchers("/api/article").hasAnyAuthority("USER", "ADMIN")
-                    .antMatchers("/api/article/count/**").hasAnyAuthority("ADMIN")
-                    .antMatchers("/h2-console").permitAll()
-                    .anyRequest().authenticated()
-                    .and()
-                    .formLogin().permitAll()
-                    .and()
-                    .logout().permitAll()
-                    .and()
-                    .exceptionHandling().accessDeniedPage("/403");
-        }
+        http
+                //HTTP Basic authentication
+                .httpBasic()
+                .and()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.POST, "/api/articles/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/count").hasRole("ADMIN")
+                .antMatchers("/h2-console/**").permitAll()
+                .and()
+                .headers().frameOptions().disable()
+                .and()
+                .csrf().ignoringAntMatchers("/h2-console/**")
+                .and()
+                .csrf().disable()
+                .formLogin().disable();
+    }
     }
 

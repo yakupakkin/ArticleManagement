@@ -4,14 +4,16 @@ import com.article.management.dao.IArticleRepository;
 import com.article.management.dto.ArticleDTO;
 import com.article.management.mapper.ArticleMapper;
 import com.article.management.model.Article;
+import com.article.management.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+
 @Service
 public class ArticleServiceImpl implements IArticleService{
 
@@ -23,15 +25,35 @@ public class ArticleServiceImpl implements IArticleService{
     }
 
     @Override
-    public Map<Date,Integer> countOfArticlesByLastSevenDays() {
-        LocalDateTime startDate = LocalDateTime.now().minusDays(7);
-        List<Article> result = articleRepository.findAllByPublishingDateBetween(startDate, LocalDateTime.now());
-        Map<Date,Integer>  map = new HashMap<>();
+    @Transactional
+    public Page<Article> findAll(Pageable pageable) {
+        return articleRepository.findAll(pageable);
+    }
+
+    @Override
+    @Transactional
+    public ArticleDTO findOne(Long id) {
+        return ArticleMapper.INSTANCE.entityToDTO(articleRepository.findById(id).get());
+    }
+    @Override
+    public Map<String, Integer> countOfArticlesByLastSevenDays() {
+        String endDate = DateUtil.convertLocalDateTimeToISO8601(LocalDateTime.now());
+        String startDate= DateUtil.convertLocalDateTimeToISO8601(LocalDateTime.now().minusDays(7));
+        List<Article> result = articleRepository.findArticlesLastSevenDays(startDate, endDate);
+        Map<String,Integer>  map = new HashMap<>();
 
         if (!result.isEmpty()) {
+            for (Article article: result) {
+                if (map.containsKey(article.getPublishingDate())) {
+                    int count = map.get(article.getPublishingDate()).intValue() + 1;
+                    map.put(article.getPublishingDate(), count);
+                } else {
+                    map.put(article.getPublishingDate(), 1);
+                }
+            }
             return map;
         } else {
-            return new HashMap<Date,Integer>();
+            return new HashMap<String,Integer>();
         }
     }
 }

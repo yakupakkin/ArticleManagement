@@ -1,35 +1,47 @@
 package com.article.management.controller;
 
 import com.article.management.dto.ArticleDTO;
-import com.article.management.model.User;
+import com.article.management.model.Article;
 import com.article.management.service.IArticleService;
-import com.article.management.service.IUserService;
+import org.apache.tomcat.util.http.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/article")
+@RequestMapping("/api")
 public class ArticleController {
 
     @Autowired
     IArticleService articleService;
-    @Autowired
-    IUserService userService;
 
-    @PostMapping(value = "/add")
-    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/articles")
     public void addArticle(@RequestBody ArticleDTO articleDTO) {
-        this.articleService.createArticle(articleDTO);
+        articleService.createArticle(articleDTO);
     }
 
-    @GetMapping(value = "/count")
-    public Map<Date, Integer> getArticleList() {
-        return this.articleService.countOfArticlesByLastSevenDays();
+    @GetMapping("/articles/{id}")
+    public ArticleDTO getArticle(@PathVariable Long id) {
+        return  articleService.findOne(id);
     }
+    @GetMapping("/articles")
+    public Page<Article> getAllArticles(Pageable pageable) {
+        return articleService.findAll(pageable);
+    }
+
+    @GetMapping("/count")
+    public Map<String, Integer> countOfArticlesByLastSevenDays() {
+        return articleService.countOfArticlesByLastSevenDays();
+    }
+
 }
+
+
