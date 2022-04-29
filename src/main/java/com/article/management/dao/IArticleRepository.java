@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface IArticleRepository extends JpaRepository<Article, Long> {
-    @Query(value = "SELECT * FROM Article WHERE DATE(PUBLISHING_DATE) >= :startDate AND DATE(PUBLISHING_DATE) <= :endDate", nativeQuery = true)
-    List<Article> findArticlesLastSevenDays(@Param("startDate") String startDate, @Param("endDate") String endDate);
+    @Query(value = "SELECT * FROM Article WHERE PUBLISHINGDATE >:startDate", nativeQuery = true)
+    List<Article> findArticlesLastSevenDays(@Param("startDate") String startDate);
 
 }

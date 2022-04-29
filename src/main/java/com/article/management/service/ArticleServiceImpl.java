@@ -37,18 +37,20 @@ public class ArticleServiceImpl implements IArticleService{
     }
     @Override
     public Map<String, Integer> countOfArticlesByLastSevenDays() {
-        String endDate = DateUtil.convertLocalDateTimeToISO8601(LocalDateTime.now());
         String startDate= DateUtil.convertLocalDateTimeToISO8601(LocalDateTime.now().minusDays(7));
-        List<Article> result = articleRepository.findArticlesLastSevenDays(startDate, endDate);
+
+        List<Article> result = articleRepository.findArticlesLastSevenDays(DateUtil.convertISO8601ToStringDate(startDate));
+
         Map<String,Integer>  map = new HashMap<>();
 
         if (!result.isEmpty()) {
             for (Article article: result) {
-                if (map.containsKey(article.getPublishingDate())) {
-                    int count = map.get(article.getPublishingDate()).intValue() + 1;
-                    map.put(article.getPublishingDate(), count);
+                String publishingDate= DateUtil.convertISO8601ToStringDate(article.getPublishingDate());
+                if (map.containsKey(publishingDate)) {
+                    int count = map.get(publishingDate).intValue() + 1;
+                    map.put(publishingDate, count);
                 } else {
-                    map.put(article.getPublishingDate(), 1);
+                    map.put(publishingDate, 1);
                 }
             }
             return map;

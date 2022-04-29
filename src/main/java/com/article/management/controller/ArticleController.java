@@ -3,18 +3,12 @@ package com.article.management.controller;
 import com.article.management.dto.ArticleDTO;
 import com.article.management.model.Article;
 import com.article.management.service.IArticleService;
-import org.apache.tomcat.util.http.ResponseUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
